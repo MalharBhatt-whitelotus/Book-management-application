@@ -10,7 +10,7 @@ env/
 
 # Python cache
 __pycache__/
-*.py[cod]
+*.py[cod]s
 *$py.class
 
 # Database files

@@ -7,7 +7,7 @@ from database import get_db
 from models.user import User
 from schemas.book_schema import BookCreate, BookUpdate, BookRead
 from services.book_services import BookService
-from services.security import get_current_admin, get_current_user
+from services.security import get_current_admin
 
 router = APIRouter()
 
