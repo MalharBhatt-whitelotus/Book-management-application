@@ -7,7 +7,7 @@ from database import get_db
 from models.user import User
 from schemas.book_schema import BookCreate, BookUpdate, BookRead
 from services.book_services import BookService
-from services.security import get_current_admin
+from services.security import get_current_admin, get_current_user
 
 router = APIRouter()
 
@@ -74,3 +74,28 @@ async def delete_book(
     Admin-only: delete book
     """
     return await BookService.delete_book(db, book_id)
+
+@router.get("/filer")
+async def filter_books(
+    category: Optional[str] = None,
+    author: Optional[str] = None,
+    book_type: Optional[str] = None,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
+    available: Optional[bool] = None,
+    sort_by: str = "id",
+    order: str = "asc",
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return await BookService.filter_and_sort_books(
+        db=db,
+        category=category,
+        author=author,
+        book_type=book_type,
+        min_price=min_price,
+        max_price=max_price,
+        available=available,
+        sort_by=sort_by,
+        order=order
+        )
