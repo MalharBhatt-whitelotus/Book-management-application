@@ -21,7 +21,7 @@ AsyncSessionLocal = sessionmaker(
 Base = declarative_base()
 
 
-def get_db():
+async def get_db():
     """
     FastAPI dependency for database session
     """
@@ -29,4 +29,4 @@ def get_db():
     try:
         yield db
     finally:
-        db.close()
+      await db.close()
