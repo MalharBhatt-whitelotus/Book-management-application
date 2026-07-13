@@ -1,518 +1,535 @@
-# Book Management System
+# 📚 Book Management System
 
-A modern **Book Management System** built with **FastAPI**, featuring a professional **single-page HTML dashboard UI** for managing books with support for:
+A modern, production-ready **Book Management System** built using **FastAPI**, **Async SQLAlchemy**, and **JWT Authentication** with a clean architecture following the **Repository-Service pattern**.
 
-* Add Book
-* Update Book
-* Delete Book
-* Search Book
-* Paginated Book Inventory
-* Book Statistics Dashboard
-* Light / Dark Mode UI
+The application allows administrators to manage book inventory while enabling users to browse and purchase books. It also supports bill generation, inventory updates, advanced filtering, sorting, file uploads, and automated testing.
 
 ---
 
-# Features
+# ✨ Features
 
-## Backend Features
+## 🔐 Authentication
 
-* Built with **FastAPI**
-* REST API for complete book management
-* CRUD operations for books
-* Search books by text
-* Paginated book listing
-* Summary APIs for dashboard stats
-
-## Frontend Features
-
-* Single-page **HTML + CSS + JavaScript** dashboard
-* Professional admin-style UI
-* Light / Dark mode toggle
-* Inventory table with pagination
-* Search bar integrated with backend search
-* Add Book collapsible form
-* Update Book modal
-* Delete confirmation modal
-* Toast notifications for user feedback
-* Responsive design
+- JWT Authentication
+- User Registration
+- User Login
+- Password Hashing using bcrypt
+- Protected APIs with Bearer Token
 
 ---
 
-# Tech Stack
+## 📚 Book Management
+
+- Add New Book
+- Update Book
+- Delete Book
+- Get Book by ID
+- Get All Books
+- Search Books
+- Advanced Filtering
+- Dynamic Sorting
+- Inventory Management
+
+---
+
+## 🧾 Billing System
+
+- Checkout Multiple Books
+- Generate Bills
+- Automatic Inventory Reduction
+- View Bills
+- View User Purchase History
+- Order Group Generation
+
+---
+
+## 📂 File Upload
+
+- Upload Book Cover Image
+- Upload PDF Documents
+- File Type Validation
+- Local Storage
+- Upload Logging
+- Background Tasks
+
+---
+
+## 📊 Dashboard
+
+- Total Books
+- Available Books
+- Hardcopy Books
+- Softcopy Books
+- Inventory Overview
+
+---
+
+## 🧪 Testing
+
+- Async Pytest
+- HTTPX Test Client
+- Authentication Tests
+- CRUD Tests
+- Checkout Tests
+- Filtering Tests
+- Sorting Tests
+
+---
+
+# 🚀 Tech Stack
 
 ## Backend
 
-* **Python**
-* **FastAPI**
-* **SQLAlchemy**
-* **Pydantic**
-* **Uvicorn**
+- Python 3.14+
+- FastAPI
+- SQLAlchemy (Async ORM)
+- SQLite
+- Pydantic v2
+- JWT Authentication
+- Passlib (bcrypt)
+- Python Multipart
+- Uvicorn
+
+---
 
 ## Frontend
 
-* **HTML**
-* **CSS**
-* **Vanilla JavaScript**
+- HTML5
+- CSS3
+- Vanilla JavaScript
+
+---
 
 ## Database
 
-* SQLite / SQLAlchemy ORM-based database
+- SQLite
 
 ---
 
-# Project Structure
+## Testing
 
-```bash
-book_management/
+- Pytest
+- pytest-asyncio
+- HTTPX
+
+---
+
+# 📁 Project Structure
+
+```text
+Book-management-application/
 │
-├── main.py                 # FastAPI app entry point
-├── models.py               # SQLAlchemy models
-├── schemas.py              # Pydantic schemas
-├── database.py             # Database connection setup
-├── logic.py                # Business logic layer
-├── router/                 # API routes
-│   └── book.py
-│
-├── templates/              # HTML templates (if used)
-│   └── index.html
-│
-├── static/                 # Static assets (if used)
-│
-├── books.db                # SQLite database
+├── config.py
+├── database.py
+├── main.py
 ├── requirements.txt
+├── .env
+│
+├── models/
+│   ├── book.py
+│   ├── bill.py
+│   └── user.py
+│
+├── schemas/
+│   ├── book_schema.py
+│   ├── bill_schema.py
+│   └── user_schema.py
+│
+├── repository/
+│   ├── book_repo.py
+│   ├── bills_repo.py
+│   └── user_repo.py
+│
+├── services/
+│   ├── book_services.py
+│   ├── bills_services.py
+│   ├── user_services.py
+│   └── security.py
+│
+├── routes/
+│   ├── book_routes.py
+│   ├── bills_routes.py
+│   └── user_routes.py
+│
+├── templates/
+│
+├── static/
+│
+├── uploads/
+│   ├── covers/
+│   └── documents/
+│
+├── tests/
+│   ├── conftest.py
+│   ├── test_books.py
+│   ├── test_users.py
+│   └── test_bills.py
+│
 └── README.md
 ```
 
-> Your actual folder names may differ slightly depending on how you organized the project.
+---
+
+# 🏗️ Architecture
+
+```
+Client
+   │
+   ▼
+Routes
+   │
+   ▼
+Services
+   │
+   ▼
+Repositories
+   │
+   ▼
+Database
+```
+
+The project follows the **Repository-Service Pattern**, separating API routes, business logic, and database operations for better maintainability.
 
 ---
 
-# Book Schema
+# 📖 Book Model
 
-Each book record follows this structure:
-
-```json
-{
-  "id": 1,
-  "title": "Python Basics",
-  "author": "John Smith",
-  "price": 499,
-  "book_type": "hardcopy"
-}
-```
-
-## Fields
-
-* `id` → Unique book ID
-* `title` → Book title
-* `author` → Author name
-* `price` → Price of the book
-* `book_type` → Type of book
-
-## Allowed `book_type` values
-
-* `hardcopy`
-* `softcopy`
+| Field | Type |
+|--------|------|
+| id | Integer |
+| title | String |
+| author | String |
+| category | String |
+| price | Float |
+| quantity | Integer |
+| description | Text |
+| book_type | hardcopy / softcopy |
+| created_at | DateTime |
 
 ---
 
-# API Endpoints
+# 👤 User Model
 
-## 1. Get Paginated Books
-
-Fetch books with pagination.
-
-**Endpoint**
-
-```http
-GET /book/get_books?page=1&limit=10
-```
-
-### Example Response
-
-```json
-{
-  "items": [
-    {
-      "id": 1,
-      "title": "Python Basics",
-      "author": "John Smith",
-      "price": 499,
-      "book_type": "hardcopy"
-    }
-  ],
-  "page": 1,
-  "limit": 10,
-  "total_pages": 5,
-  "total_items": 48
-}
-```
+| Field | Type |
+|--------|------|
+| id | Integer |
+| name | String |
+| email | String |
+| password | String (Hashed) |
+| role | Admin/User |
 
 ---
 
-## 2. Add Book
+# 🧾 Bill Model
 
-Add a new book to inventory.
-
-**Endpoint**
-
-```http
-POST /book/add_book
-```
-
-### Request Body
-
-```json
-{
-  "title": "FastAPI Guide",
-  "author": "Jane Doe",
-  "price": 599,
-  "book_type": "softcopy"
-}
-```
+| Field | Type |
+|--------|------|
+| id | Integer |
+| order_group | String |
+| user_id | Integer |
+| book_id | Integer |
+| customer_name | String |
+| book_title | String |
+| quantity | Integer |
+| unit_price | Float |
+| line_total | Float |
+| purchased_at | DateTime |
 
 ---
 
-## 3. Update Book
+# 🔗 API Endpoints
 
-Update an existing book.
+## Authentication
 
-**Endpoint**
+| Method | Endpoint | Description |
+|----------|----------------------|----------------|
+| POST | `/users/register` | Register User |
+| POST | `/users/login` | Login User |
 
-```http
-PUT /book/update/{book_id}
-```
+---
+
+## Books
+
+| Method | Endpoint | Description |
+|----------|----------------------------|----------------|
+| GET | `/books` | Get All Books |
+| GET | `/books/{id}` | Get Book by ID |
+| POST | `/books` | Add Book |
+| PUT | `/books/{id}` | Update Book |
+| DELETE | `/books/{id}` | Delete Book |
+| GET | `/books/search/{keyword}` | Search Books |
+| GET | `/books/filter` | Advanced Filtering & Sorting |
+
+---
+
+### Filtering Parameters
+
+| Parameter | Description |
+|------------|-------------|
+| category | Filter by category |
+| author | Filter by author |
+| book_type | hardcopy / softcopy |
+| min_price | Minimum price |
+| max_price | Maximum price |
+| available | Quantity > 0 |
+
+---
+
+### Sorting Parameters
+
+| Parameter | Values |
+|------------|--------|
+| sort_by | id,title,author,category,price,quantity,created_at |
+| order | asc / desc |
+
+---
 
 ### Example
 
-```http
-PUT /book/update/1
 ```
-
-### Request Body
-
-```json
-{
-  "title": "Updated Book Title",
-  "author": "Updated Author",
-  "price": 699,
-  "book_type": "hardcopy"
-}
+GET /books/filter?
+category=Programming&
+author=Robert C. Martin&
+book_type=hardcopy&
+min_price=300&
+max_price=1000&
+available=true&
+sort_by=price&
+order=asc
 ```
 
 ---
 
-## 4. Delete Book
+## Bills
 
-Delete a book from inventory.
+| Method | Endpoint | Description |
+|----------|----------------------------|----------------|
+| POST | `/bills/checkout` | Checkout Books |
+| GET | `/bills/{bill_id}` | Get Bill |
+| GET | `/bills` | Get All Bills |
+| GET | `/bills/user` | User Purchase History |
+| GET | `/bills/order/{order_group}` | Order Summary |
 
-**Endpoint**
+---
 
-```http
-DELETE /book/delete/{book_id}
+# 🔄 Checkout Flow
+
 ```
-
-### Example
-
-```http
-DELETE /book/delete/1
+User Login
+      │
+      ▼
+Select Books
+      │
+      ▼
+Validate Stock
+      │
+      ▼
+Generate Bill
+      │
+      ▼
+Reduce Inventory
+      │
+      ▼
+Commit Transaction
+      │
+      ▼
+Return Bill Summary
 ```
 
 ---
 
-## 5. Search Book
+# 🖼️ File Upload
 
-Search books from the backend.
+Supported uploads:
 
-**Endpoint**
+- Book Cover Images
+- PDF Documents
 
-```http
-GET /book/search_book/{search_text}
-```
+Features
 
-### Example
-
-```http
-GET /book/search_book/python
-```
+- File validation
+- Local storage
+- Upload logging
+- Background tasks
 
 ---
 
-## 6. Get Total Books
+# 🔐 Security
 
-Returns total number of books in inventory.
-
-**Endpoint**
-
-```http
-GET /book/get_total_books
-```
+- JWT Authentication
+- Password Hashing
+- Protected Routes
+- Bearer Authentication
+- OAuth2 Password Flow
 
 ---
 
-## 7. Get Hard Copy Count
+# 🧪 Automated Testing
 
-Returns total hardcopy books.
+Implemented using
 
-**Endpoint**
+- pytest
+- pytest-asyncio
+- HTTPX Async Client
 
-```http
-GET /book/get_hard_copies
-```
+### Test Coverage
 
----
+- User Registration
+- User Login
+- Add Book
+- Update Book
+- Delete Book
+- Search Book
+- Filter Books
+- Sort Books
+- Checkout Books
+- Bill Generation
+- Authentication
 
-## 8. Get Soft Copy Count
-
-Returns total softcopy books.
-
-**Endpoint**
-
-```http
-GET /book/get_soft_copies
-```
-
----
-
-# Frontend Dashboard Overview
-
-The Book Management dashboard includes the following sections:
-
-## 1. Header
-
-* App branding / dashboard title
-* Theme toggle for light/dark mode
-
-## 2. Stats Cards
-
-Displays:
-
-* Total Books
-* Hard Copies
-* Soft Copies
-
-## 3. Add Book Section
-
-* Hidden/collapsible add book form
-* Allows adding new books to inventory
-
-## 4. Books Inventory Table
-
-Displays:
-
-* ID
-* Title
-* Author
-* Price
-* Type
-* Actions
-
-### Inventory Table Features
-
-* Professional dashboard-style UI
-* Backend pagination
-* Search integration
-* Edit / Delete actions
-* Empty state handling
-
-## 5. Update Modal
-
-* Edit book details
-* Save updates through backend API
-
-## 6. Delete Confirmation Modal
-
-* Confirm deletion before removing a book
-
-## 7. Toast Notifications
-
-* Success / error feedback for actions
-
----
-
-# How to Run the Project
-
-## 1. Clone the Repository
+Run tests:
 
 ```bash
-git clone <your-repo-url>
-cd book_management
+pytest -v
 ```
 
-## 2. Create and Activate Virtual Environment
-
-### macOS / Linux
+Run with coverage:
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+pytest --cov
 ```
+
+---
+
+# ⚙️ Installation
+
+## Clone Repository
+
+```bash
+git clone <repository-url>
+
+cd Book-management-application
+```
+
+---
+
+## Create Virtual Environment
 
 ### Windows
 
 ```bash
-python -m venv venv
-venv\Scripts\activate
+python -m venv .venv
+
+.venv\Scripts\activate
 ```
 
-## 3. Install Dependencies
+### Linux / macOS
+
+```bash
+python3 -m venv .venv
+
+source .venv/bin/activate
+```
+
+---
+
+## Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 4. Run the FastAPI Server
+---
+
+## Configure Environment
+
+Create a `.env` file.
+
+Example:
+
+```env
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+
+DATABASE_URL=sqlite+aiosqlite:///./books.db
+
+UPLOAD_FOLDER=uploads
+```
+
+---
+
+## Run Application
 
 ```bash
 uvicorn main:app --reload
 ```
 
-## 5. Open in Browser
+Application:
 
-Visit:
-
-```bash
-http://127.0.0.1:8000/
+```
+http://127.0.0.1:8000
 ```
 
-or the route where your HTML dashboard is served.
+Swagger Documentation:
+
+```
+http://127.0.0.1:8000/docs
+```
+
+ReDoc Documentation:
+
+```
+http://127.0.0.1:8000/redoc
+```
 
 ---
 
-# Example `requirements.txt`
+# 📦 Dependencies
 
-```txt
+```text
 fastapi
 uvicorn
 sqlalchemy
-jinja2
+aiosqlite
 pydantic
+pydantic-settings
+python-jose
+passlib
+bcrypt
 python-multipart
+jinja2
+pytest
+pytest-asyncio
+httpx
 ```
 
-> Add/remove packages depending on your actual project setup.
+---
+
+# 📈 Future Improvements
+
+- PostgreSQL Support
+- Docker Deployment
+- Redis Caching
+- Email Notifications
+- Role-Based Access Control
+- Payment Gateway Integration
+- Inventory Analytics Dashboard
+- Book Recommendation System
+- Export Bills to PDF
+- Email Invoice Generation
 
 ---
 
-# Pagination Behavior
-
-The inventory table uses **backend pagination**.
-
-## Normal Mode
-
-When no search is active:
-
-* Books load using:
-
-  ```http
-  GET /book/get_books?page=1&limit=10
-  ```
-* Pagination controls show:
-
-  * Prev
-  * Next
-  * Page buttons
-  * Ellipsis when needed
-* Summary example:
-
-  * `Showing 1–10 of 48 books`
-
-## Search Mode
-
-When search text is entered:
-
-* Books load using:
-
-  ```http
-  GET /book/search_book/{search_text}
-  ```
-* Results are shown in the same inventory table
-* Pagination controls are hidden or disabled
-* Summary example:
-
-  * `Found 4 matching books`
-
----
-
-# Search Functionality
-
-The inventory section includes backend-powered search.
-
-## Search Behavior
-
-* User enters text in the search bar
-* Frontend calls:
-
-  ```http
-  /book/search_book/{search_text}
-  ```
-* Matching books are rendered in the same table
-* Clearing the search restores normal paginated inventory mode
-
----
-
-# CRUD Flow Summary
-
-## Add Book
-
-1. Click **Add Book**
-2. Fill in title, author, price, and book type
-3. Submit form
-4. Book is added via backend API
-5. Stats and table refresh
-
-## Update Book
-
-1. Click **Edit** on a book row
-2. Update values in the modal
-3. Save changes
-4. Backend updates the record
-5. Stats and table refresh
-
-## Delete Book
-
-1. Click **Delete**
-2. Confirm deletion
-3. Backend deletes the book
-4. Stats and table refresh
-
----
-
-# UI Highlights
-
-* Clean admin dashboard layout
-* Modern inventory table
-* Search + pagination integration
-* Responsive design
-* Dark mode support
-* Consistent buttons, modals, and forms
-* Simple and professional styling
-
----
-
-# Future Improvements
-
-Possible enhancements for the project:
-
-* Authentication / login system
-* Role-based access (Admin / Staff)
-* Book category support
-* Sorting by price / title / author
-* Export inventory to CSV / Excel
-* Filter by book type
-* Advanced search with multiple fields
-* Book cover image support
-* Better analytics dashboard
-
----
-
-# Author
+# 👨‍💻 Author
 
 **Malhar Bhatt**
 
+GitHub: *Add your GitHub profile here*
+
 ---
 
-# License
+# 📄 License
 
-This project is for learning / academic / portfolio use.
-You can update the license section based on your preference, for example **MIT License**.
+This project is released for educational and portfolio purposes.
+
+You may choose to license it under the **MIT License** if you intend to make it open source.
