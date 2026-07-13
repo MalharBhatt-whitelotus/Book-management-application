@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from sqlalchemy import select,or_
+from sqlalchemy import select,or_, asc, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.book import Book
@@ -76,3 +76,51 @@ class BookRepository:
         book.quantity -= quantity
         await db.flush()  # keep transaction open; commit will happen in service layer
         return book
+    
+    @staticmethod
+    async def filter_and_sort_books(
+        db: AsyncSession, 
+        category: str | None = None,
+        author: str | None = None,
+        book_type: str | None = None,
+        min_price: float | None = None,
+        max_price: float | None = None,
+        available: bool | None = None,
+        sort_by: str = "id",
+        order: str = "asc"
+        ):
+        query = select(Book)
+
+        if category:
+            query = query.where(Book.category.ilike(f"%{category}%"))
+        if author:
+            query = query.where(Book.author.ilike(f"%{author}%"))
+        if book_type:
+            query = query.where(Book.book_type == book_type)
+        if min_price is not None:
+            query = query.where(Book.price >= min_price)
+        if max_price is not None:
+            query = query.where(Book.price <= max_price)
+        if available:
+            query = query.where(Book.quantity > 0)
+        
+        allowed_columns = {
+            "id":Book.id,
+            "title": Book.title,
+            "author": Book.author,
+            "category": Book.category,
+            "price": Book.price,
+            "quantity": Book.quantity,
+            "created_at": Book.created_at
+        }
+
+        column = allowed_columns.get(sort_by, Book.id)
+        
+        if order.lower() == "desc":
+            query = query.order_by(desc(column))
+        else:
+            query = query.order_by(asc(column))
+        
+        result = await db.execute(query)
+
+        return result.scalars().all()
