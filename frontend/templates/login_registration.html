@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Management System - Login</title>
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --border:#e2e8f0;
+      --success:#16a34a;
+      --danger:#dc2626;
+      --shadow:0 12px 30px rgba(15,23,42,.08);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:linear-gradient(135deg,#eef4ff,#f8fafc 45%,#f3f6fb);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    .page{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:28px;
+      padding:32px;
+    }
+
+    .hero{
+      padding:40px;
+      border-radius:28px;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.18), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(59,130,246,.12), transparent 30%),
+        #0f172a;
+      color:#fff;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-height: calc(100vh - 64px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      font-weight:800;
+      font-size:1.15rem;
+      letter-spacing:.2px;
+    }
+
+    .brand-badge{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,#3b82f6,#2563eb);
+      font-size:1.3rem;
+      box-shadow:0 12px 30px rgba(37,99,235,.25);
+    }
+
+    .hero-copy{
+      max-width:620px;
+      margin-top:36px;
+    }
+
+    .hero h1{
+      margin:0 0 16px;
+      font-size:3rem;
+      line-height:1.05;
+      letter-spacing:-1px;
+    }
+
+    .hero p{
+      margin:0;
+      color:rgba(255,255,255,.82);
+      font-size:1.04rem;
+      line-height:1.8;
+    }
+
+    .hero-cards{
+      margin-top:28px;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:16px;
+    }
+
+    .hero-card{
+      padding:18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(6px);
+    }
+
+    .hero-card h3{
+      margin:0 0 8px;
+      font-size:1rem;
+    }
+
+    .hero-card p{
+      font-size:.92rem;
+      line-height:1.6;
+      color:rgba(255,255,255,.72);
+    }
+
+    .panel{
+      background:var(--card);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(148,163,184,.12);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      padding:34px;
+      min-height: calc(100vh - 64px);
+    }
+
+    .panel-top{
+      margin-bottom:24px;
+    }
+
+    .panel-top h2{
+      margin:0 0 8px;
+      font-size:1.9rem;
+      letter-spacing:-.5px;
+    }
+
+    .panel-top p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      background:#f8fafc;
+      padding:8px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      margin-bottom:22px;
+    }
+
+    .tab-btn{
+      flex:1;
+      border:none;
+      background:transparent;
+      padding:12px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      color:#475569;
+      transition:.2s ease;
+    }
+
+    .tab-btn.active{
+      background:#fff;
+      color:var(--primary);
+      box-shadow:0 8px 20px rgba(15,23,42,.06);
+    }
+
+    .form-card{
+      display:none;
+      animation:fadeIn .25s ease;
+    }
+
+    .form-card.active{
+      display:block;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0; transform:translateY(6px)}
+      to{opacity:1; transform:translateY(0)}
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .field{
+      margin-bottom:14px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      display:block;
+      font-size:.93rem;
+      font-weight:700;
+      margin-bottom:8px;
+      color:#1e293b;
+    }
+
+    input{
+      width:100%;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:.98rem;
+      outline:none;
+      transition:.2s ease;
+    }
+
+    input:focus{
+      border-color:#93c5fd;
+      box-shadow:0 0 0 4px rgba(59,130,246,.12);
+    }
+
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:14px;
+      padding:14px 18px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s ease;
+      font-size:1rem;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+      color:#fff;
+      box-shadow:0 12px 24px rgba(37,99,235,.24);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.02);
+    }
+
+    .helper{
+      margin-top:14px;
+      font-size:.9rem;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    .alert{
+      display:none;
+      margin-bottom:16px;
+      padding:13px 15px;
+      border-radius:14px;
+      font-size:.95rem;
+      font-weight:600;
+      line-height:1.5;
+    }
+
+    .alert.show{display:block}
+    .alert.success{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}
+    .alert.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+
+    .demo-box{
+      margin-top:18px;
+      padding:16px;
+      border-radius:16px;
+      background:#f8fafc;
+      border:1px dashed var(--border);
+      color:#475569;
+      line-height:1.7;
+      font-size:.94rem;
+    }
+
+    .demo-box strong{color:#0f172a}
+
+    @media (max-width: 1100px){
+      .page{
+        grid-template-columns:1fr;
+      }
+      .hero, .panel{
+        min-height:auto;
+      }
+    }
+
+    @media (max-width: 640px){
+      .page{padding:18px}
+      .hero, .panel{padding:22px}
+      .hero h1{font-size:2.2rem}
+      .hero-cards{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div>
+        <div class="brand">
+          <div class="brand-badge">📚</div>
+          <div>Book Management System</div>
+        </div>
+
+        <div class="hero-copy">
+          <h1>Inventory, checkout, and billing in one clean workflow.</h1>
+          <p>
+            A complete book store and inventory platform built with FastAPI, SQLAlchemy, SQLite,
+            JWT authentication, and role-based dashboards for both admin and user workflows.
+          </p>
+        </div>
+
+        <div class="hero-cards">
+          <div class="hero-card">
+            <h3>Admin Inventory Control</h3>
+            <p>Add, update, delete books, monitor stock, and review billing history.</p>
+          </div>
+          <div class="hero-card">
+            <h3>User Purchase Flow</h3>
+            <p>Browse available books, select quantities, checkout, and receive generated bills.</p>
+          </div>
+          <div class="hero-card">
+            <h3>Automatic Stock Updates</h3>
+            <p>Every successful checkout reduces inventory and stores the bill in the database.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="helper" style="color:rgba(255,255,255,.7)">
+        Tip: The default admin credentials come from your <strong>.env</strong> file.
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-top">
+        <h2>Welcome back</h2>
+        <p>Login to continue, or create a new user account to start browsing and purchasing books.</p>
+      </div>
+
+      <div id="alertBox" class="alert"></div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="login">Login</button>
+        <button class="tab-btn" data-tab="register">Register</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="loginCard" class="form-card active">
+        <form id="loginForm">
+          <div class="field">
+            <label for="loginUsername">Username</label>
+            <input id="loginUsername" name="username" type="text" placeholder="Enter your username" required />
+          </div>
+
+          <div class="field">
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" name="password" type="password" placeholder="Enter your password" required />
+          </div>
+
+          <button class="btn btn-primary" type="submit">Login</button>
+        </form>
+
+        <div class="demo-box">
+          <strong>Admin login:</strong> use the admin username/password from your <code>.env</code> file.<br/>
+          <strong>User login:</strong> register a normal user account from the Register tab.
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="registerCard" class="form-card">
+        <form id="registerForm">
+          <div class="grid">
+            <div class="field">
+              <label for="regName">Full Name</label>
+              <input id="regName" name="name" type="text" placeholder="Your full name" required />
+            </div>
+
+            <div class="field">
+              <label for="regUsername">Username</label>
+              <input id="regUsername" name="username" type="text" placeholder="Choose a username" required />
+            </div>
+
+            <div class="field full">
+              <label for="regEmail">Email</label>
+              <input id="regEmail" name="email" type="email" placeholder="Enter your email" required />
+            </div>
+
+            <div class="field full">
+              <label for="regPassword">Password</label>
+              <input id="regPassword" name="password" type="password" placeholder="Create a password" required />
+            </div>
+          </div>
+
+          <button class="btn btn-primary" type="submit">Create Account</button>
+        </form>
+
+        <div class="helper">
+          After successful registration, you can login immediately using your new credentials.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    const alertBox = document.getElementById("alertBox");
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const loginCard = document.getElementById("loginCard");
+    const registerCard = document.getElementById("registerCard");
+
+    function showAlert(message, type = "success") {
+      alertBox.className = `alert show ${type}`;
+      alertBox.textContent = message;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function clearAlert() {
+      alertBox.className = "alert";
+      alertBox.textContent = "";
+    }
+
+    function activateTab(tab) {
+      tabButtons.forEach(btn => btn.classList.remove("active"));
+      document.querySelector(`[data-tab="${tab}"]`).classList.add("active");
+
+      if (tab === "login") {
+        loginCard.classList.add("active");
+        registerCard.classList.remove("active");
+      } else {
+        registerCard.classList.add("active");
+        loginCard.classList.remove("active");
+      }
+      clearAlert();
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => activateTab(btn.dataset.tab));
+    });
+
+    // REGISTER
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearAlert();
+
+      const payload = {
+        name: document.getElementById("regName").value.trim(),
+        username: document.getElementById("regUsername").value.trim(),
+        email: document.getElementById("regEmail").value.trim(),
+        password: document.getElementById("regPassword").value
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/users/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.detail || "Registration failed");
+        }
+
+        showAlert("Registration successful. Please login with your new account.", "success");
+        document.getElementById("registerForm").reset();
+        activateTab("login");
+      } catch (err) {
+        showAlert(err.message || "Registration failed", "error");
+      }
+    });
+
+    // LOGIN
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearAlert();
+
+      const payload = {
+        username: document.getElementById("loginUsername").value.trim(),
+        password: document.getElementById("loginPassword").value
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/users/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.detail || "Login failed");
+        }
+
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("user_role", data.role);
+        localStorage.setItem("username", data.username);
+
+        if (data.role === "admin") {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/dashboard";
+        }
+      } catch (err) {
+        showAlert(err.message || "Login failed", "error");
+      }
+    });
+  </script>
+</body>
+</html>

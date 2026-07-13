@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Dashboard - Book Management System</title>
+  <style>
+    :root{
+      --bg:#f8fafc;
+      --panel:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --success:#16a34a;
+      --danger:#dc2626;
+      --border:#e2e8f0;
+      --shadow:0 12px 30px rgba(15,23,42,.08);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:rgba(248,250,252,.92);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(226,232,240,.9);
+      padding:18px 28px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:800;
+      font-size:1.05rem;
+    }
+
+    .brand-badge{
+      width:42px;height:42px;border-radius:14px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,#3b82f6,#2563eb);
+      color:#fff;
+      box-shadow:0 10px 24px rgba(37,99,235,.24);
+    }
+
+    .topbar-right{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .search-box{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:8px 10px;
+      min-width:320px;
+      box-shadow:var(--shadow);
+    }
+
+    .search-box input{
+      border:none;
+      outline:none;
+      width:100%;
+      font-size:.96rem;
+      background:transparent;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:11px 16px;
+      cursor:pointer;
+      font-weight:800;
+      transition:.2s ease;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+      color:#fff;
+      box-shadow:0 12px 24px rgba(37,99,235,.2);
+    }
+
+    .btn-secondary{
+      background:#fff;
+      color:#0f172a;
+      border:1px solid var(--border);
+    }
+
+    .page{
+      padding:28px;
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:22px;
+      align-items:start;
+    }
+
+    .hero{
+      background:
+        radial-gradient(circle at top right, rgba(37,99,235,.10), transparent 28%),
+        #fff;
+      border:1px solid var(--border);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:24px;
+      margin-bottom:22px;
+    }
+
+    .hero h1{
+      margin:0 0 10px;
+      font-size:2rem;
+      letter-spacing:-.7px;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.8;
+      max-width:820px;
+    }
+
+    .books-grid{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:18px;
+    }
+
+    .book-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .book-card h3{
+      margin:0;
+      font-size:1.15rem;
+      letter-spacing:-.3px;
+    }
+
+    .book-meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 12px;
+      border-radius:999px;
+      font-size:.82rem;
+      font-weight:800;
+    }
+
+    .badge.blue{background:#eff6ff;color:#1d4ed8}
+    .badge.green{background:#ecfdf5;color:#166534}
+    .badge.orange{background:#fff7ed;color:#b45309}
+    .badge.red{background:#fef2f2;color:#b91c1c}
+
+    .muted{
+      color:var(--muted);
+    }
+
+    .book-desc{
+      color:#475569;
+      line-height:1.7;
+      min-height:52px;
+    }
+
+    .book-bottom{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:16px;
+      margin-top:auto;
+    }
+
+    .price{
+      font-size:1.25rem;
+      font-weight:900;
+      letter-spacing:-.3px;
+    }
+
+    .qty-control{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .qty-control input{
+      width:84px;
+      padding:11px 12px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      outline:none;
+      font-weight:700;
+    }
+
+    .side-panel{
+      position:sticky;
+      top:92px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    .card h2{
+      margin:0 0 8px;
+      font-size:1.2rem;
+      letter-spacing:-.3px;
+    }
+
+    .card p{
+      margin:0 0 16px;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .cart-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      max-height:340px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .cart-item{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      background:#fff;
+    }
+
+    .cart-top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+
+    .cart-actions{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .mini-btn{
+      border:none;
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:.84rem;
+    }
+
+    .mini-btn.remove{
+      background:#fef2f2;
+      color:#b91c1c;
+    }
+
+    .summary{
+      border-top:1px dashed var(--border);
+      margin-top:16px;
+      padding-top:16px;
+    }
+
+    .summary-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+      font-size:.97rem;
+    }
+
+    .summary-row.total{
+      font-size:1.1rem;
+      font-weight:900;
+      margin-top:12px;
+    }
+
+    .history-card{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      background:#fff;
+      margin-bottom:12px;
+    }
+
+    .history-items{
+      margin-top:10px;
+      padding-top:10px;
+      border-top:1px dashed var(--border);
+    }
+
+    .alert{
+      display:none;
+      margin:0 28px 0;
+      padding:14px 16px;
+      border-radius:14px;
+      font-weight:700;
+      line-height:1.6;
+    }
+
+    .alert.show{display:block}
+    .alert.success{background:#ecfdf5;border:1px solid #bbf7d0;color:#166534}
+    .alert.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+
+    .bill-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:100;
+    }
+
+    .bill-modal.show{
+      display:flex;
+    }
+
+    .bill-content{
+      width:min(720px, 100%);
+      background:#fff;
+      border-radius:24px;
+      box-shadow:0 24px 50px rgba(15,23,42,.18);
+      padding:24px;
+      max-height:90vh;
+      overflow:auto;
+    }
+
+    .bill-head{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .bill-table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:12px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      overflow:hidden;
+    }
+
+    .bill-table th, .bill-table td{
+      padding:12px;
+      border-bottom:1px solid #edf2f7;
+      text-align:left;
+    }
+
+    .bill-table th{
+      background:#f8fafc;
+      font-size:.86rem;
+      text-transform:uppercase;
+      letter-spacing:.3px;
+      color:#334155;
+    }
+
+    @media (max-width: 1180px){
+      .page{
+        grid-template-columns:1fr;
+      }
+      .side-panel{
+        position:relative;
+        top:0;
+      }
+    }
+
+    @media (max-width: 860px){
+      .books-grid{
+        grid-template-columns:1fr;
+      }
+      .topbar{
+        flex-direction:column;
+        align-items:stretch;
+      }
+      .topbar-right{
+        justify-content:space-between;
+      }
+      .search-box{
+        min-width:unset;
+        width:100%;
+      }
+    }
+
+    @media (max-width: 640px){
+      .page{padding:18px}
+      .topbar{padding:16px 18px}
+      .alert{margin:0 18px}
+      .hero h1{font-size:1.65rem}
+      .book-bottom{
+        flex-direction:column;
+        align-items:stretch;
+      }
+      .qty-control{
+        justify-content:space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-badge">📚</div>
+      <div>Book Store Dashboard</div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="search-box">
+        <span>🔎</span>
+        <input id="searchInput" type="text" placeholder="Search by title, author, or category" />
+      </div>
+      <button class="btn btn-secondary" id="searchBtn">Search</button>
+      <button class="btn btn-secondary" id="clearSearchBtn">Clear</button>
+      <button class="btn btn-secondary" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <div id="alertBox" class="alert"></div>
+
+  <main class="page">
+    <section>
+      <div class="hero">
+        <h1 id="welcomeTitle">Welcome</h1>
+        <p>
+          Browse available books, add them to your cart, and checkout in one flow.
+          After checkout, your bill is generated and inventory is updated automatically.
+        </p>
+      </div>
+
+      <div id="booksGrid" class="books-grid"></div>
+    </section>
+
+    <aside class="side-panel">
+      <div class="card">
+        <h2>Checkout Cart</h2>
+        <p>Review selected books and complete your checkout.</p>
+
+        <div id="cartList" class="cart-list"></div>
+
+        <div class="summary">
+          <div class="summary-row">
+            <span>Total Items</span>
+            <strong id="cartItemsCount">0</strong>
+          </div>
+          <div class="summary-row total">
+            <span>Total Amount</span>
+            <span id="cartTotal">₹0.00</span>
+          </div>
+
+          <button class="btn btn-primary" id="checkoutBtn" style="width:100%; margin-top:14px;">Checkout</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Purchase History</h2>
+        <p>Your recent bills and generated orders.</p>
+        <div id="historyContainer"></div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Bill Modal -->
+  <div id="billModal" class="bill-modal">
+    <div class="bill-content">
+      <div class="bill-head">
+        <div>
+          <h2 style="margin:0 0 6px;">Bill Generated</h2>
+          <div class="muted">Your checkout was completed successfully.</div>
+        </div>
+        <button class="btn btn-secondary" id="closeBillModal">Close</button>
+      </div>
+      <div id="billModalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    const token = localStorage.getItem("access_token");
+    const role = localStorage.getItem("user_role");
+    const username = localStorage.getItem("username");
+
+    if (!token) {
+      window.location.href = "/";
+    }
+    if (role !== "user" && role !== "admin") {
+      window.location.href = "/";
+    }
+
+    const alertBox = document.getElementById("alertBox");
+    const booksGrid = document.getElementById("booksGrid");
+    const searchInput = document.getElementById("searchInput");
+    const cartList = document.getElementById("cartList");
+    const cartItemsCount = document.getElementById("cartItemsCount");
+    const cartTotal = document.getElementById("cartTotal");
+    const historyContainer = document.getElementById("historyContainer");
+    const welcomeTitle = document.getElementById("welcomeTitle");
+
+    const billModal = document.getElementById("billModal");
+    const billModalContent = document.getElementById("billModalContent");
+
+    welcomeTitle.textContent = `Welcome, ${username || "Reader"}`;
+
+    let books = [];
+    let cart = [];
+
+    function showAlert(message, type = "success") {
+      alertBox.className = `alert show ${type}`;
+      alertBox.textContent = message;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function clearAlert() {
+      alertBox.className = "alert";
+      alertBox.textContent = "";
+    }
+
+    function authHeaders(json = false) {
+      const headers = {
+        "Authorization": `Bearer ${token}`
+      };
+      if (json) headers["Content-Type"] = "application/json";
+      return headers;
+    }
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    async function loadBooks(keyword = "") {
+      clearAlert();
+      try {
+        const url = keyword
+          ? `${API_BASE}/books/?keyword=${encodeURIComponent(keyword)}`
+          : `${API_BASE}/books/available`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.detail || "Failed to load books");
+
+        books = Array.isArray(data) ? data : [];
+        renderBooks(books);
+      } catch (err) {
+        booksGrid.innerHTML = `
+          <div class="card" style="grid-column:1/-1">
+            <strong style="color:#991b1b;">Failed to load books</strong>
+            <div class="muted" style="margin-top:8px;">${escapeHtml(err.message || "Unknown error")}</div>
+          </div>
+        `;
+      }
+    }
+
+    function renderBooks(bookList) {
+      if (!bookList.length) {
+        booksGrid.innerHTML = `
+          <div class="card" style="grid-column:1/-1">
+            <h2 style="margin-top:0;">No books found</h2>
+            <p>No books matched your search or no stock is currently available.</p>
+          </div>
+        `;
+        return;
+      }
+
+      booksGrid.innerHTML = bookList.map(book => {
+        let stockBadge = `<span class="badge green">In Stock: ${book.quantity}</span>`;
+        if (book.quantity <= 5) {
+          stockBadge = `<span class="badge orange">Low Stock: ${book.quantity}</span>`;
+        }
+        if (book.quantity === 0) {
+          stockBadge = `<span class="badge red">Out of Stock</span>`;
+        }
+
+        return `
+          <div class="book-card">
+            <div>
+              <h3>${escapeHtml(book.title)}</h3>
+              <div class="muted" style="margin-top:6px;">by ${escapeHtml(book.author)}</div>
+            </div>
+
+            <div class="book-meta">
+              <span class="badge blue">${escapeHtml(book.category)}</span>
+              <span class="badge blue">${escapeHtml(book.book_type || "N/A")}</span>
+              ${stockBadge}
+            </div>
+
+            <div class="book-desc">
+              ${escapeHtml(book.description || "No description available for this book.")}
+            </div>
+
+            <div class="book-bottom">
+              <div>
+                <div class="muted">Price</div>
+                <div class="price">₹${Number(book.price).toFixed(2)}</div>
+              </div>
+
+              <div class="qty-control">
+                <input id="qty-${book.id}" type="number" min="1" max="${book.quantity}" value="1" />
+                <button class="btn btn-primary" onclick="addToCart(${book.id})" ${book.quantity === 0 ? "disabled" : ""}>
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    window.addToCart = function(bookId) {
+      clearAlert();
+
+      const book = books.find(b => b.id === bookId);
+      if (!book) {
+        showAlert("Book not found", "error");
+        return;
+      }
+
+      const qtyInput = document.getElementById(`qty-${bookId}`);
+      const quantity = Number(qtyInput.value);
+
+      if (!quantity || quantity <= 0) {
+        showAlert("Please enter a valid quantity", "error");
+        return;
+      }
+
+      if (quantity > book.quantity) {
+        showAlert(`Only ${book.quantity} units available for ${book.title}`, "error");
+        return;
+      }
+
+      const existing = cart.find(item => item.book_id === bookId);
+      if (existing) {
+        const newQty = existing.quantity + quantity;
+        if (newQty > book.quantity) {
+          showAlert(`Cannot add more than available stock for ${book.title}`, "error");
+          return;
+        }
+        existing.quantity = newQty;
+      } else {
+        cart.push({
+          book_id: book.id,
+          title: book.title,
+          price: Number(book.price),
+          quantity
+        });
+      }
+
+      renderCart();
+      showAlert(`${book.title} added to cart`, "success");
+    }
+
+    function renderCart() {
+      if (!cart.length) {
+        cartList.innerHTML = `
+          <div class="muted">No books added yet. Select books from the catalog to begin checkout.</div>
+        `;
+        cartItemsCount.textContent = "0";
+        cartTotal.textContent = "₹0.00";
+        return;
+      }
+
+      cartList.innerHTML = cart.map(item => {
+        const lineTotal = item.price * item.quantity;
+        return `
+          <div class="cart-item">
+            <div class="cart-top">
+              <div>
+                <div style="font-weight:800">${escapeHtml(item.title)}</div>
+                <div class="muted">₹${item.price.toFixed(2)} × ${item.quantity}</div>
+              </div>
+              <div style="font-weight:900">₹${lineTotal.toFixed(2)}</div>
+            </div>
+
+            <div class="cart-actions">
+              <button class="mini-btn remove" onclick="removeFromCart(${item.book_id})">Remove</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      cartItemsCount.textContent = totalItems;
+      cartTotal.textContent = `₹${totalAmount.toFixed(2)}`;
+    }
+
+    window.removeFromCart = function(bookId) {
+      cart = cart.filter(item => item.book_id !== bookId);
+      renderCart();
+    }
+
+    async function checkoutCart() {
+      clearAlert();
+
+      if (!cart.length) {
+        showAlert("Your cart is empty", "error");
+        return;
+      }
+
+      const payload = {
+        items: cart.map(item => ({
+          book_id: item.book_id,
+          quantity: item.quantity
+        }))
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/bills/checkout`, {
+          method: "POST",
+          headers: authHeaders(true),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.detail || "Checkout failed");
+        }
+
+        cart = [];
+        renderCart();
+        renderBillModal(data);
+        showAlert("Checkout successful. Bill generated.", "success");
+
+        await loadBooks();
+        await loadPurchaseHistory();
+      } catch (err) {
+        showAlert(err.message || "Checkout failed", "error");
+      }
+    }
+
+    function renderBillModal(bill) {
+      const itemsRows = (bill.items || []).map(item => `
+        <tr>
+          <td>${escapeHtml(item.book_title)}</td>
+          <td>${item.quantity}</td>
+          <td>₹${Number(item.unit_price).toFixed(2)}</td>
+          <td>₹${Number(item.line_total).toFixed(2)}</td>
+        </tr>
+      `).join("");
+
+      billModalContent.innerHTML = `
+        <div class="card" style="box-shadow:none; border-radius:18px; padding:18px;">
+          <div style="display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+            <div>
+              <div class="muted">Order Group</div>
+              <div style="font-weight:900; font-size:1.05rem;">${escapeHtml(bill.order_group)}</div>
+            </div>
+            <div>
+              <div class="muted">Customer</div>
+              <div style="font-weight:800">${escapeHtml(bill.customer_name)}</div>
+            </div>
+            <div>
+              <div class="muted">Purchased At</div>
+              <div style="font-weight:700">${bill.purchased_at ? new Date(bill.purchased_at).toLocaleString() : "-"}</div>
+            </div>
+          </div>
+
+          <table class="bill-table">
+            <thead>
+              <tr>
+                <th>Book</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Line Total</th>
+              </tr>
+            </thead>
+            <tbody>${itemsRows}</tbody>
+          </table>
+
+          <div style="display:flex; justify-content:flex-end; margin-top:16px; font-size:1.15rem; font-weight:900;">
+            Total: ₹${Number(bill.total_amount).toFixed(2)}
+          </div>
+        </div>
+      `;
+
+      billModal.classList.add("show");
+    }
+
+    async function loadPurchaseHistory() {
+      try {
+        const res = await fetch(`${API_BASE}/bills/my`, {
+          headers: authHeaders()
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to load purchase history");
+
+        if (!Array.isArray(data) || data.length === 0) {
+          historyContainer.innerHTML = `
+            <div class="muted">No purchases yet. Your generated bills will appear here after checkout.</div>
+          `;
+          return;
+        }
+
+        const grouped = {};
+        data.forEach(row => {
+          if (!grouped[row.order_group]) grouped[row.order_group] = [];
+          grouped[row.order_group].push(row);
+        });
+
+        historyContainer.innerHTML = Object.entries(grouped).map(([orderGroup, rows]) => {
+          const total = rows.reduce((sum, r) => sum + Number(r.line_total || 0), 0);
+          const purchasedAt = rows[0]?.purchased_at ? new Date(rows[0].purchased_at).toLocaleString() : "-";
+
+          const itemsHtml = rows.map(item => `
+            <div style="display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px dashed #edf2f7;">
+              <div>
+                <div style="font-weight:700">${escapeHtml(item.book_title)}</div>
+                <div class="muted">Qty: ${item.quantity} × ₹${Number(item.unit_price).toFixed(2)}</div>
+              </div>
+              <div style="font-weight:800">₹${Number(item.line_total).toFixed(2)}</div>
+            </div>
+          `).join("");
+
+          return `
+            <div class="history-card">
+              <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div>
+                  <div style="font-weight:800">${escapeHtml(orderGroup)}</div>
+                  <div class="muted">${escapeHtml(purchasedAt)}</div>
+                </div>
+                <div style="font-weight:900">₹${total.toFixed(2)}</div>
+              </div>
+              <div class="history-items">${itemsHtml}</div>
+            </div>
+          `;
+        }).join("");
+      } catch (err) {
+        historyContainer.innerHTML = `
+          <div class="history-card" style="border-color:#fecaca;background:#fff7f7;">
+            <strong style="color:#991b1b;">Failed to load purchase history</strong>
+            <div class="muted" style="margin-top:8px;">${escapeHtml(err.message || "Unknown error")}</div>
+          </div>
+        `;
+      }
+    }
+
+    // Search handlers
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      const keyword = searchInput.value.trim();
+      loadBooks(keyword);
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        loadBooks(searchInput.value.trim());
+      }
+    });
+
+    document.getElementById("clearSearchBtn").addEventListener("click", () => {
+      searchInput.value = "";
+      loadBooks();
+    });
+
+    document.getElementById("checkoutBtn").addEventListener("click", checkoutCart);
+
+    document.getElementById("closeBillModal").addEventListener("click", () => {
+      billModal.classList.remove("show");
+    });
+
+    billModal.addEventListener("click", (e) => {
+      if (e.target === billModal) {
+        billModal.classList.remove("show");
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_role");
+      localStorage.removeItem("username");
+      window.location.href = "/";
+    });
+
+    // Initial page load
+    renderCart();
+    loadBooks();
+    loadPurchaseHistory();
+  </script>
+</body>
+</html>

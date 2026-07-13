@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - Book Management System</title>
+  <style>
+    :root{
+      --bg:#f8fafc;
+      --panel:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --success:#16a34a;
+      --danger:#dc2626;
+      --warning:#d97706;
+      --border:#e2e8f0;
+      --shadow:0 12px 30px rgba(15,23,42,.08);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      min-height:100vh;
+    }
+
+    .sidebar{
+      background:#0f172a;
+      color:#fff;
+      padding:24px;
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+      position:sticky;
+      top:0;
+      height:100vh;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:800;
+      font-size:1.05rem;
+    }
+
+    .brand-badge{
+      width:42px;height:42px;border-radius:14px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,#3b82f6,#2563eb);
+      box-shadow:0 10px 24px rgba(37,99,235,.28);
+    }
+
+    .side-card{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:16px;
+      line-height:1.7;
+      color:rgba(255,255,255,.8);
+      font-size:.94rem;
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .nav button{
+      border:none;
+      background:transparent;
+      color:#cbd5e1;
+      padding:12px 14px;
+      text-align:left;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.2s ease;
+    }
+
+    .nav button.active,
+    .nav button:hover{
+      background:rgba(255,255,255,.08);
+      color:#fff;
+    }
+
+    .logout-btn{
+      margin-top:auto;
+      background:#ef4444;
+      color:#fff;
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:800;
+    }
+
+    .content{
+      padding:28px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:22px;
+    }
+
+    .topbar h1{
+      margin:0 0 8px;
+      font-size:2rem;
+      letter-spacing:-.6px;
+    }
+
+    .topbar p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .topbar-right{
+      background:var(--panel);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      border-radius:18px;
+      padding:16px 18px;
+      min-width:250px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:16px;
+      margin-bottom:22px;
+    }
+
+    .stat-card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    .stat-label{
+      color:var(--muted);
+      font-weight:700;
+      margin-bottom:10px;
+      font-size:.92rem;
+    }
+
+    .stat-value{
+      font-size:2rem;
+      font-weight:800;
+      letter-spacing:-.8px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
+
+    .card h2{
+      margin:0 0 8px;
+      font-size:1.2rem;
+      letter-spacing:-.3px;
+    }
+
+    .card p{
+      margin:0 0 18px;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .field{
+      margin-bottom:14px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      display:block;
+      margin-bottom:8px;
+      font-size:.92rem;
+      font-weight:700;
+      color:#1e293b;
+    }
+
+    input, textarea, select{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      outline:none;
+      font-size:.97rem;
+      background:#fff;
+      transition:.2s ease;
+    }
+
+    textarea{
+      min-height:110px;
+      resize:vertical;
+    }
+
+    input:focus, textarea:focus, select:focus{
+      border-color:#93c5fd;
+      box-shadow:0 0 0 4px rgba(59,130,246,.12);
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:800;
+      transition:.2s ease;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+      color:#fff;
+      box-shadow:0 12px 24px rgba(37,99,235,.2);
+    }
+
+    .btn-primary:hover{transform:translateY(-1px)}
+
+    .btn-secondary{
+      background:#f1f5f9;
+      color:#0f172a;
+    }
+
+    .btn-danger{
+      background:#fef2f2;
+      color:#b91c1c;
+    }
+
+    .btn-warning{
+      background:#fff7ed;
+      color:#b45309;
+    }
+
+    .btn-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:980px;
+    }
+
+    th, td{
+      padding:14px 14px;
+      text-align:left;
+      border-bottom:1px solid #edf2f7;
+      vertical-align:top;
+      font-size:.95rem;
+    }
+
+    th{
+      background:#f8fafc;
+      color:#334155;
+      font-size:.88rem;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+    }
+
+    tr:hover td{
+      background:#fcfdff;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 12px;
+      border-radius:999px;
+      font-size:.82rem;
+      font-weight:800;
+    }
+
+    .badge.green{background:#ecfdf5;color:#166534}
+    .badge.orange{background:#fff7ed;color:#b45309}
+    .badge.red{background:#fef2f2;color:#b91c1c}
+    .badge.blue{background:#eff6ff;color:#1d4ed8}
+
+    .muted{
+      color:var(--muted);
+    }
+
+    .alert{
+      display:none;
+      margin-bottom:18px;
+      padding:14px 16px;
+      border-radius:14px;
+      font-weight:700;
+      line-height:1.6;
+    }
+
+    .alert.show{display:block}
+    .alert.success{background:#ecfdf5;border:1px solid #bbf7d0;color:#166534}
+    .alert.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+
+    .section{
+      display:none;
+    }
+
+    .section.active{
+      display:block;
+    }
+
+    .bill-card{
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+      background:#fff;
+      margin-bottom:14px;
+    }
+
+    .bill-header{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+
+    .bill-items{
+      margin-top:10px;
+      padding-top:10px;
+      border-top:1px dashed var(--border);
+    }
+
+    @media (max-width: 1200px){
+      .grid{grid-template-columns:1fr}
+      .stats{grid-template-columns:1fr 1fr}
+    }
+
+    @media (max-width: 980px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{
+        height:auto;
+        position:relative;
+      }
+    }
+
+    @media (max-width: 640px){
+      .content{padding:18px}
+      .stats{grid-template-columns:1fr}
+      .form-grid{grid-template-columns:1fr}
+      .topbar{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">📘</div>
+        <div>Admin Panel</div>
+      </div>
+
+      <div class="side-card">
+        Manage inventory, review stock, and monitor generated bills from one dashboard.
+      </div>
+
+      <div class="nav">
+        <button class="nav-btn active" data-section="inventorySection">Inventory</button>
+        <button class="nav-btn" data-section="billsSection">Bills / Orders</button>
+      </div>
+
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div>
+          <h1>Book Inventory Dashboard</h1>
+          <p>Manage books, stock, and billing records. All actions here are connected directly to your FastAPI backend.</p>
+        </div>
+        <div class="topbar-right">
+          <div class="muted" style="font-size:.9rem; margin-bottom:6px;">Logged in as</div>
+          <div style="font-weight:800; font-size:1.05rem;" id="adminName">Admin</div>
+          <div class="muted" style="margin-top:6px;">Role: administrator</div>
+        </div>
+      </div>
+
+      <div id="alertBox" class="alert"></div>
+
+      <section id="inventorySection" class="section active">
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-label">Total Books</div>
+            <div class="stat-value" id="totalBooks">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">In Stock Units</div>
+            <div class="stat-value" id="totalUnits">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Low Stock Titles</div>
+            <div class="stat-value" id="lowStockBooks">0</div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h2 id="formTitle">Add New Book</h2>
+            <p>Use this form to add a new inventory item or update an existing book.</p>
+
+            <form id="bookForm">
+              <input type="hidden" id="bookId" />
+
+              <div class="form-grid">
+                <div class="field">
+                  <label for="title">Title</label>
+                  <input id="title" type="text" required />
+                </div>
+
+                <div class="field">
+                  <label for="author">Author</label>
+                  <input id="author" type="text" required />
+                </div>
+
+                <div class="field">
+                  <label for="category">Category</label>
+                  <input id="category" type="text" required />
+                </div>
+
+                <div class="field">
+                  <label for="bookType">Book Type</label>
+                  <select id="bookType">
+                    <option value="hardcopy">Hardcopy</option>
+                    <option value="softcopy">Softcopy</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="price">Price</label>
+                  <input id="price" type="number" step="0.01" min="0" required />
+                </div>
+
+                <div class="field">
+                  <label for="quantity">Quantity</label>
+                  <input id="quantity" type="number" min="0" required />
+                </div>
+
+                <div class="field full">
+                  <label for="description">Description</label>
+                  <textarea id="description" placeholder="Optional description"></textarea>
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button class="btn btn-primary" type="submit" id="submitBtn">Add Book</button>
+                <button class="btn btn-secondary" type="button" id="resetBtn">Reset</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h2>Inventory Notes</h2>
+            <p>Helpful reminders for stock management.</p>
+
+            <div class="bill-card">
+              <strong>Checkout rule</strong>
+              <div class="muted" style="margin-top:8px;">
+                Whenever a bill is created, the purchased quantity is automatically deducted from inventory.
+              </div>
+            </div>
+
+            <div class="bill-card">
+              <strong>Low stock monitoring</strong>
+              <div class="muted" style="margin-top:8px;">
+                Books with quantity less than or equal to 5 are highlighted as low stock in the table.
+              </div>
+            </div>
+
+            <div class="bill-card">
+              <strong>Admin access</strong>
+              <div class="muted" style="margin-top:8px;">
+                Create, update, and delete operations require a valid admin JWT token.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+          <h2>Books Inventory</h2>
+          <p>Current list of books stored in the inventory database.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Book</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="booksTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="billsSection" class="section">
+        <div class="card">
+          <h2>All Bills / Orders</h2>
+          <p>Generated billing records across all users.</p>
+          <div id="billsContainer"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    const token = localStorage.getItem("access_token");
+    const role = localStorage.getItem("user_role");
+    const username = localStorage.getItem("username");
+
+    if (!token) {
+      window.location.href = "/";
+    }
+    if (role !== "admin") {
+      alert("Admin access required.");
+      window.location.href = "/";
+    }
+
+    document.getElementById("adminName").textContent = username || "Admin";
+
+    const alertBox = document.getElementById("alertBox");
+    const booksTableBody = document.getElementById("booksTableBody");
+    const billsContainer = document.getElementById("billsContainer");
+
+    const totalBooksEl = document.getElementById("totalBooks");
+    const totalUnitsEl = document.getElementById("totalUnits");
+    const lowStockBooksEl = document.getElementById("lowStockBooks");
+
+    const bookForm = document.getElementById("bookForm");
+    const bookIdInput = document.getElementById("bookId");
+    const formTitle = document.getElementById("formTitle");
+    const submitBtn = document.getElementById("submitBtn");
+
+    const fields = {
+      title: document.getElementById("title"),
+      author: document.getElementById("author"),
+      category: document.getElementById("category"),
+      bookType: document.getElementById("bookType"),
+      price: document.getElementById("price"),
+      quantity: document.getElementById("quantity"),
+      description: document.getElementById("description")
+    };
+
+    function showAlert(message, type = "success") {
+      alertBox.className = `alert show ${type}`;
+      alertBox.textContent = message;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function clearAlert() {
+      alertBox.className = "alert";
+      alertBox.textContent = "";
+    }
+
+    function authHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      };
+    }
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function resetForm() {
+      bookForm.reset();
+      bookIdInput.value = "";
+      formTitle.textContent = "Add New Book";
+      submitBtn.textContent = "Add Book";
+    }
+
+    function renderStats(books) {
+      const totalBooks = books.length;
+      const totalUnits = books.reduce((sum, b) => sum + (Number(b.quantity) || 0), 0);
+      const lowStock = books.filter(b => Number(b.quantity) <= 5).length;
+
+      totalBooksEl.textContent = totalBooks;
+      totalUnitsEl.textContent = totalUnits;
+      lowStockBooksEl.textContent = lowStock;
+    }
+
+    async function loadBooks() {
+      try {
+        const res = await fetch(`${API_BASE}/books/`);
+        const books = await res.json();
+
+        if (!res.ok) throw new Error(books.detail || "Failed to load books");
+
+        renderStats(books);
+
+        booksTableBody.innerHTML = books.map(book => {
+          let stockBadge = `<span class="badge green">In Stock</span>`;
+          if (book.quantity === 0) {
+            stockBadge = `<span class="badge red">Out of Stock</span>`;
+          } else if (book.quantity <= 5) {
+            stockBadge = `<span class="badge orange">Low Stock</span>`;
+          }
+
+          return `
+            <tr>
+              <td>${book.id}</td>
+              <td>
+                <div style="font-weight:800">${escapeHtml(book.title)}</div>
+                <div class="muted">${escapeHtml(book.author)}</div>
+              </td>
+              <td>${escapeHtml(book.category)}</td>
+              <td><span class="badge blue">${escapeHtml(book.book_type || "N/A")}</span></td>
+              <td>₹${Number(book.price).toFixed(2)}</td>
+              <td>
+                <div style="font-weight:800">${book.quantity}</div>
+                <div style="margin-top:6px">${stockBadge}</div>
+              </td>
+              <td class="muted">${escapeHtml(book.description || "-")}</td>
+              <td>
+                <div class="btn-row">
+                  <button class="btn btn-warning" onclick='editBook(${JSON.stringify(book).replace(/'/g, "&apos;")})'>Edit</button>
+                  <button class="btn btn-danger" onclick="deleteBook(${book.id})">Delete</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      } catch (err) {
+        showAlert(err.message || "Failed to load books", "error");
+      }
+    }
+
+    window.editBook = function(book) {
+      clearAlert();
+      bookIdInput.value = book.id;
+      fields.title.value = book.title || "";
+      fields.author.value = book.author || "";
+      fields.category.value = book.category || "";
+      fields.bookType.value = book.book_type || "hardcopy";
+      fields.price.value = book.price ?? "";
+      fields.quantity.value = book.quantity ?? "";
+      fields.description.value = book.description || "";
+
+      formTitle.textContent = `Update Book #${book.id}`;
+      submitBtn.textContent = "Update Book";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function createBook(payload) {
+      const res = await fetch(`${API_BASE}/books/`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to create book");
+      return data;
+    }
+
+    async function updateBook(id, payload) {
+      const res = await fetch(`${API_BASE}/books/${id}`, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to update book");
+      return data;
+    }
+
+    window.deleteBook = async function(id) {
+      const ok = confirm("Are you sure you want to delete this book?");
+      if (!ok) return;
+
+      clearAlert();
+
+      try {
+        const res = await fetch(`${API_BASE}/books/${id}`, {
+          method: "DELETE",
+          headers: authHeaders()
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to delete book");
+
+        showAlert(data.message || "Book deleted successfully", "success");
+        await loadBooks();
+      } catch (err) {
+        showAlert(err.message || "Failed to delete book", "error");
+      }
+    }
+
+    bookForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearAlert();
+
+      const payload = {
+        title: fields.title.value.trim(),
+        author: fields.author.value.trim(),
+        category: fields.category.value.trim(),
+        book_type: fields.bookType.value,
+        price: Number(fields.price.value),
+        quantity: Number(fields.quantity.value),
+        description: fields.description.value.trim() || null
+      };
+
+      try {
+        if (bookIdInput.value) {
+          await updateBook(bookIdInput.value, payload);
+          showAlert("Book updated successfully", "success");
+        } else {
+          await createBook(payload);
+          showAlert("Book created successfully", "success");
+        }
+
+        resetForm();
+        await loadBooks();
+      } catch (err) {
+        showAlert(err.message || "Book operation failed", "error");
+      }
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", resetForm);
+
+    async function loadBills() {
+      try {
+        const res = await fetch(`${API_BASE}/bills/`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to load bills");
+
+        if (!Array.isArray(data) || data.length === 0) {
+          billsContainer.innerHTML = `
+            <div class="bill-card">
+              <strong>No bills found</strong>
+              <div class="muted" style="margin-top:8px;">Bills will appear here after users checkout books.</div>
+            </div>
+          `;
+          return;
+        }
+
+        const grouped = {};
+        data.forEach(row => {
+          if (!grouped[row.order_group]) grouped[row.order_group] = [];
+          grouped[row.order_group].push(row);
+        });
+
+        const html = Object.entries(grouped).map(([orderGroup, rows]) => {
+          const total = rows.reduce((sum, r) => sum + Number(r.line_total || 0), 0);
+          const customer = rows[0]?.customer_name || "Unknown";
+          const purchasedAt = rows[0]?.purchased_at ? new Date(rows[0].purchased_at).toLocaleString() : "-";
+
+          const itemsHtml = rows.map(item => `
+            <div style="display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px dashed #edf2f7;">
+              <div>
+                <div style="font-weight:700">${escapeHtml(item.book_title)}</div>
+                <div class="muted">Qty: ${item.quantity} × ₹${Number(item.unit_price).toFixed(2)}</div>
+              </div>
+              <div style="font-weight:800">₹${Number(item.line_total).toFixed(2)}</div>
+            </div>
+          `).join("");
+
+          return `
+            <div class="bill-card">
+              <div class="bill-header">
+                <div>
+                  <div style="font-weight:800; font-size:1rem;">${escapeHtml(orderGroup)}</div>
+                  <div class="muted">Customer: ${escapeHtml(customer)}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-weight:800">₹${total.toFixed(2)}</div>
+                  <div class="muted">${escapeHtml(purchasedAt)}</div>
+                </div>
+              </div>
+              <div class="bill-items">${itemsHtml}</div>
+            </div>
+          `;
+        }).join("");
+
+        billsContainer.innerHTML = html;
+      } catch (err) {
+        billsContainer.innerHTML = `
+          <div class="bill-card" style="border-color:#fecaca;background:#fff7f7;">
+            <strong style="color:#991b1b;">Failed to load bills</strong>
+            <div class="muted" style="margin-top:8px;">${escapeHtml(err.message || "Unknown error")}</div>
+          </div>
+        `;
+      }
+    }
+
+    // Navigation between sections
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const sectionId = btn.dataset.section;
+        document.querySelectorAll(".section").forEach(section => section.classList.remove("active"));
+        document.getElementById(sectionId).classList.add("active");
+
+        if (sectionId === "billsSection") {
+          await loadBills();
+        }
+      });
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_role");
+      localStorage.removeItem("username");
+      window.location.href = "/";
+    });
+
+    // Initial load
+    loadBooks();
+  </script>
+</body>
+</html>
