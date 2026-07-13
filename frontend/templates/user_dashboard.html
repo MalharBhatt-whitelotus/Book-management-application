@@ -84,6 +84,51 @@
       background:transparent;
     }
 
+    .select-box{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:8px 10px;
+      box-shadow:var(--shadow);
+    }
+
+    .select-box select,
+    .select-box input{
+      border:none;
+      outline:none;
+      font-size:.96rem;
+      background:transparent;
+      font-family:inherit;
+      color:var(--text);
+    }
+
+    .select-box select{
+      width:100%;
+      cursor:pointer;
+    }
+
+    #filterBox select,
+    #sortBox select{
+      min-width:130px;
+    }
+
+    #filterValueBox{
+      display:none;
+    }
+
+    #filterValueBox input,
+    #filterValueBox select{
+      width:140px;
+    }
+
+    #filterValueBox input#filterMinPrice,
+    #filterValueBox input#filterMaxPrice{
+      width:90px;
+    }
+
     .btn{
       border:none;
       border-radius:14px;
@@ -419,6 +464,13 @@
         min-width:unset;
         width:100%;
       }
+      .select-box{
+        width:100%;
+      }
+      #filterValueBox input,
+      #filterValueBox select{
+        width:100%;
+      }
     }
 
     @media (max-width: 640px){
@@ -444,6 +496,32 @@
     </div>
 
     <div class="topbar-right">
+      <div class="select-box" id="filterBox">
+        <select id="filterSelect">
+          <option value="" selected disabled>Filter By</option>
+          <option value="category">Category</option>
+          <option value="book_type">Book Type</option>
+          <option value="price">Price</option>
+          <option value="author">Author</option>
+        </select>
+      </div>
+
+      <div class="select-box" id="filterValueBox"></div>
+
+      <div class="select-box" id="sortBox">
+        <select id="sortSelect">
+          <option value="" selected disabled>Sort By</option>
+          <option value="price_asc">Price: Low → High</option>
+          <option value="price_desc">Price: High → Low</option>
+          <option value="title_asc">Title: A → Z</option>
+          <option value="title_desc">Title: Z → A</option>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+        </select>
+      </div>
+
+      <button class="btn btn-secondary" id="applyFilterBtn">Apply</button>
+
       <div class="search-box">
         <span>🔎</span>
         <input id="searchInput" type="text" placeholder="Search by title, author, or category" />
@@ -881,6 +959,92 @@
       }
     }
 
+    // Filter & Sort handlers
+    const filterSelect = document.getElementById("filterSelect");
+    const filterValueBox = document.getElementById("filterValueBox");
+    const sortSelect = document.getElementById("sortSelect");
+
+    function renderFilterValueInput(filterType) {
+      if (!filterType) {
+        filterValueBox.style.display = "none";
+        filterValueBox.innerHTML = "";
+        return;
+      }
+
+      filterValueBox.style.display = "flex";
+
+      if (filterType === "category") {
+        filterValueBox.innerHTML = `<input type="text" id="filterValueInput" placeholder="Enter category" />`;
+      } else if (filterType === "author") {
+        filterValueBox.innerHTML = `<input type="text" id="filterValueInput" placeholder="Enter author" />`;
+      } else if (filterType === "book_type") {
+        filterValueBox.innerHTML = `
+          <select id="filterValueInput">
+            <option value="" selected disabled>Select type</option>
+            <option value="hardcopy">Hardcopy</option>
+            <option value="softcopy">Softcopy</option>
+          </select>
+        `;
+      } else if (filterType === "price") {
+        filterValueBox.innerHTML = `
+          <input type="number" id="filterMinPrice" placeholder="Min Price" />
+          <input type="number" id="filterMaxPrice" placeholder="Max Price" />
+        `;
+      }
+    }
+
+    filterSelect.addEventListener("change", (e) => {
+      renderFilterValueInput(e.target.value);
+    });
+
+    function resetFilterSortControls() {
+      filterSelect.value = "";
+      sortSelect.value = "";
+      renderFilterValueInput("");
+    }
+
+    async function applyFilterSort() {
+      clearAlert();
+
+      const filterType = filterSelect.value;
+      const sortValue = sortSelect.value;
+      const params = new URLSearchParams();
+
+      if (filterType === "category" || filterType === "author") {
+        const val = document.getElementById("filterValueInput")?.value.trim();
+        if (val) params.append(filterType, val);
+      } else if (filterType === "book_type") {
+        const val = document.getElementById("filterValueInput")?.value;
+        if (val) params.append("book_type", val);
+      } else if (filterType === "price") {
+        const min = document.getElementById("filterMinPrice")?.value;
+        const max = document.getElementById("filterMaxPrice")?.value;
+        if (min) params.append("min_price", min);
+        if (max) params.append("max_price", max);
+      }
+
+      if (sortValue) params.append("sort", sortValue);
+
+      if (![...params.keys()].length) {
+        showAlert("Please select a filter or sort option.", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/books/filter?${params.toString()}`);
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.detail || "Failed to filter books");
+
+        books = Array.isArray(data) ? data : [];
+        renderBooks(books);
+      } catch (err) {
+        showAlert(err.message || "Failed to filter books", "error");
+      }
+    }
+
+    document.getElementById("applyFilterBtn").addEventListener("click", applyFilterSort);
+
     // Search handlers
     document.getElementById("searchBtn").addEventListener("click", () => {
       const keyword = searchInput.value.trim();
@@ -896,6 +1060,7 @@
 
     document.getElementById("clearSearchBtn").addEventListener("click", () => {
       searchInput.value = "";
+      resetFilterSortControls();
       loadBooks();
     });
 
