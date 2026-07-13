@@ -1,6 +1,7 @@
 from typing import List, Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.bill import Bill
 
@@ -11,37 +12,37 @@ class BillsRepository:
     """
 
     @staticmethod
-    def create_bill_rows(db: Session, bill_rows: List[Bill]) -> List[Bill]:
+    async def create_bill_rows(db: AsyncSession, bill_rows: List[Bill]) -> List[Bill]:
         """
         Adds multiple bill rows to the current transaction.
         Does not commit automatically because checkout should remain transactional.
         """
         db.add_all(bill_rows)
-        db.flush()
+        await db.flush()
         return bill_rows
 
     @staticmethod
-    def get_bill_by_id(db: Session, bill_id: int) -> Optional[Bill]:
-        return db.query(Bill).filter(Bill.id == bill_id).first()
+    async def get_bill_by_id(db: AsyncSession, bill_id: int) -> Optional[Bill]:
+        result = await db.execute(select(Bill).where(Bill.id == bill_id))
+        return result.scalar_one_or_none()
 
     @staticmethod
-    def get_bills_by_order_group(db: Session, order_group: str) -> List[Bill]:
-        return (
-            db.query(Bill)
-            .filter(Bill.order_group == order_group)
+    async def get_bills_by_order_group(db: AsyncSession, order_group: str) -> List[Bill]:
+        result = await db.execute(select(Bill)
+            .where(Bill.order_group == order_group)
             .order_by(Bill.id.asc())
-            .all()
         )
+        return result.scalars().all()
 
     @staticmethod
-    def get_all_bills(db: Session) -> List[Bill]:
-        return db.query(Bill).order_by(Bill.id.desc()).all()
+    async def get_all_bills(db: AsyncSession) -> List[Bill]:
+        result = await db.execute(select(Bill).order_by(Bill.id.desc()))
+        return result.scalars().all()
 
     @staticmethod
-    def get_bills_by_user_id(db: Session, user_id: int) -> List[Bill]:
-        return (
-            db.query(Bill)
-            .filter(Bill.user_id == user_id)
+    async def get_bills_by_user_id(db: AsyncSession, user_id: int) -> List[Bill]:
+        result = await db.execute(select(Bill)
+            .where(Bill.user_id == user_id)
             .order_by(Bill.id.desc())
-            .all()
         )
+        return result.scalars().all()

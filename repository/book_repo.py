@@ -1,6 +1,7 @@
 from typing import Optional, List
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select,or_
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.book import Book
 from schemas.book_schema import BookCreate, BookUpdate
@@ -13,61 +14,65 @@ class BookRepository:
     """
 
     @staticmethod
-    def create_book(db: Session, book_data: BookCreate) -> Book:
+    async def create_book(db: AsyncSession, book_data: BookCreate) -> Book:
         book = Book(**book_data.model_dump())
         db.add(book)
-        db.commit()
-        db.refresh(book)
+        await db.commit()
+        await db.refresh(book)
         return book
 
     @staticmethod
-    def get_all_books(db: Session) -> List[Book]:
-        return db.query(Book).order_by(Book.id.desc()).all()
+    async def get_all_books(db: AsyncSession) -> List[Book]:
+        result = await db.execute(select(Book).order_by(Book.id.desc()))
+        return result.scalars().all()
 
     @staticmethod
-    def get_available_books(db: Session) -> List[Book]:
-        return db.query(Book).filter(Book.quantity > 0).order_by(Book.id.desc()).all()
+    async def get_available_books(db: AsyncSession) -> List[Book]:
+        result = await db.execute(select(Book).where(Book.quantity > 0).order_by(Book.id.desc()))
+        return result.scalars().all()
 
     @staticmethod
-    def get_book_by_id(db: Session, book_id: int) -> Optional[Book]:
-        return db.query(Book).filter(Book.id == book_id).first()
+    async def get_book_by_id(db: AsyncSession, book_id: int) -> Optional[Book]:
+        result = await db.execute(select(Book).where(Book.id == book_id))
+        return result.scalar_one_or_none(),
 
     @staticmethod
-    def search_books(db: Session, keyword: str) -> List[Book]:
+    async def search_books(db: AsyncSession, keyword: str) -> List[Book]:
         keyword = f"%{keyword}%"
-        return (
-            db.query(Book)
-            .filter(
-                (Book.title.ilike(keyword)) |
-                (Book.author.ilike(keyword)) |
-                (Book.category.ilike(keyword))
-            )
-            .order_by(Book.id.desc())
-            .all()
+        result = await db.execute(
+            select(Book)
+            .where( 
+                or_(
+                    Book.title.ilike(keyword) ,
+                    Book.author.ilike(keyword) ,
+                    Book.category.ilike(keyword)
+                    )
+                    ).order_by(Book.id.desc())
         )
+        return result.scalars().all()
 
     @staticmethod
-    def update_book(db: Session, book: Book, update_data: BookUpdate) -> Book:
+    async def update_book(db: AsyncSession, book: Book, update_data: BookUpdate) -> Book:
         data = update_data.model_dump(exclude_unset=True)
 
         for key, value in data.items():
             setattr(book, key, value)
 
-        db.commit()
-        db.refresh(book)
+        await db.commit()
+        await db.refresh(book)
         return book
 
     @staticmethod
-    def delete_book(db: Session, book: Book) -> None:
-        db.delete(book)
-        db.commit()
+    async def delete_book(db: AsyncSession, book: Book) -> None:
+        await db.delete(book)
+        await db.commit()
 
     @staticmethod
-    def reduce_book_stock(db: Session, book: Book, quantity: int) -> Book:
+    async def reduce_book_stock(db: AsyncSession, book: Book, quantity: int) -> Book:
         """
         Deduct stock after successful checkout.
         Assumes stock validation already happened in service layer.
         """
         book.quantity -= quantity
-        db.flush()  # keep transaction open; commit will happen in service layer
+        await db.flush()  # keep transaction open; commit will happen in service layer
         return book

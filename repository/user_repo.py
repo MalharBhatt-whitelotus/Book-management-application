@@ -1,6 +1,7 @@
 from typing import Optional, List
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.user import User
 
@@ -11,8 +12,8 @@ class UserRepository:
     """
 
     @staticmethod
-    def create_user(
-        db: Session,
+    async def create_user(
+        db: AsyncSession,
         name: str,
         username: str,
         email: str,
@@ -27,28 +28,33 @@ class UserRepository:
             role=role
         )
         db.add(user)
-        db.commit()
-        db.refresh(user)
+        await db.commit()
+        await db.refresh(user)
         return user
 
     @staticmethod
-    def get_all_users(db: Session) -> List[User]:
-        return db.query(User).order_by(User.id.desc()).all()
+    async def get_all_users(db: AsyncSession) -> List[User]:
+        result = await db.execute(select(User).order_by(User.id.desc()))
+        return result.scalars().all()
 
     @staticmethod
-    def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
-        return db.query(User).filter(User.id == user_id).first()
+    async def get_user_by_id(db: AsyncSession, user_id: int) -> Optional[User]:
+        result = await db.execute(select(User).where(User.id == user_id))
+        return result.scalar_one_or_none()
 
     @staticmethod
-    def get_user_by_username(db: Session, username: str) -> Optional[User]:
-        return db.query(User).filter(User.username == username).first()
+    async def get_user_by_username(db: AsyncSession, username: str) -> Optional[User]:
+        result = await db.execute(select(User).where(User.username == username))
+        return result.scalar_one_or_none()
 
     @staticmethod
-    def get_user_by_email(db: Session, email: str) -> Optional[User]:
-        return db.query(User).filter(User.email == email).first()
+    async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
+        result = await db.execute(select(User).where(User.email == email))
+        return result.scalar_one_or_none()
 
     @staticmethod
-    def get_user_by_username_or_email(db: Session, value: str) -> Optional[User]:
-        return db.query(User).filter(
+    async def get_user_by_username_or_email(db: AsyncSession, value: str) -> Optional[User]:
+        result = await db.execute(select(User).where(
             (User.username == value) | (User.email == value)
-        ).first()
+        ))
+        return result.scalar_one_or_none()
