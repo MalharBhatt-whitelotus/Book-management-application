@@ -34,7 +34,7 @@ class BookRepository:
     @staticmethod
     async def get_book_by_id(db: AsyncSession, book_id: int) -> Optional[Book]:
         result = await db.execute(select(Book).where(Book.id == book_id))
-        return result.scalar_one_or_none(),
+        return result.scalar_one_or_none()
 
     @staticmethod
     async def search_books(db: AsyncSession, keyword: str) -> List[Book]:

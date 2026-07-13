@@ -61,7 +61,7 @@ class UserService:
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
-        access_token = await create_access_token(
+        access_token = create_access_token(
             data={
                 "sub": user.username,
                 "role": user.role,

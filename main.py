@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
+from contextlib import asynccontextmanager
 from config import settings
 from database import Base, engine, AsyncSessionLocal
 
@@ -18,7 +18,14 @@ from routes.bills_routes import router as bills_router
 
 from services.user_services import UserService
 
-app = FastAPI(
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    await engine.dispose()
+
+app = FastAPI(lifespan=lifespan,
     title=settings.APP_NAME,
     version=settings.APP_VERSION
 )
@@ -37,20 +44,6 @@ templates = Jinja2Templates(directory="frontend/templates")
 
 # Optional static folder mount
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-@app.on_event("startup")
-def on_startup():
-    """
-    Create DB tables and ensure default admin exists.
-    """
-    Base.metadata.create_all(bind=engine)
-
-    db = AsyncSessionLocal()
-    try:
-        UserService.create_default_admin_if_not_exists(db)
-    finally:
-        db.close()
 
 
 @app.get("/health")

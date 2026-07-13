@@ -90,7 +90,7 @@ class BillsService:
             for row in bill_rows:
                 await db.refresh(row)
 
-            return await BillsService._build_bill_response(
+            return BillsService._build_bill_response(
                 bill_rows=bill_rows,
                 total_amount=total_amount,
                 customer_name=current_user.name,
@@ -138,7 +138,7 @@ class BillsService:
         total_amount = sum(row.line_total for row in rows)
         customer_name = rows[0].customer_name
 
-        return await BillsService._build_bill_response(
+        return BillsService._build_bill_response(
             bill_rows=rows,
             total_amount=total_amount,
             customer_name=customer_name,
