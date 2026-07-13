@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from config import settings
-from database import Base, engine, SessionLocal
+from database import Base, engine, AsyncSessionLocal
 
 # Import models so SQLAlchemy registers tables
 from models.book import Book
@@ -46,7 +46,7 @@ def on_startup():
     """
     Base.metadata.create_all(bind=engine)
 
-    db = SessionLocal()
+    db = AsyncSessionLocal()
     try:
         UserService.create_default_admin_if_not_exists(db)
     finally:
