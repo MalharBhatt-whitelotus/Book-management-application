@@ -1,6 +1,32 @@
-*.pdf
-*.env
+# Environment variables
+.env
+.env.*
+
+# Virtual environments
+.venv/
+venv/
+book_venv/
+env/
+
+# Python cache
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Database files
 *.db
-*.venv
-.book_venv/
+*.sqlite3
+
+# PDF files
+*.pdf
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
