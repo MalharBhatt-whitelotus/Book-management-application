@@ -2,8 +2,7 @@ import uuid
 from typing import List
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-
+from sqlalchemy.ext.asyncio import AsyncSession
 from models.bill import Bill
 from models.user import User
 from repository.book_repo import BookRepository
@@ -17,7 +16,7 @@ class BillsService:
     """
 
     @staticmethod
-    def checkout_books(db: Session, current_user: User, checkout_data: CheckoutRequest) -> BillResponse:
+    async def checkout_books(db: AsyncSession, current_user: User, checkout_data: CheckoutRequest) -> BillResponse:
         """
         Flow:
         1. Validate all books exist
@@ -40,7 +39,7 @@ class BillsService:
 
         try:
             for item in checkout_data.items:
-                book = BookRepository.get_book_by_id(db, item.book_id)
+                book = await BookRepository.get_book_by_id(db, item.book_id)
 
                 if not book:
                     raise HTTPException(
@@ -79,19 +78,19 @@ class BillsService:
                 bill_rows.append(bill_row)
 
                 # reduce stock in the same transaction
-                BookRepository.reduce_book_stock(db, book, item.quantity)
+                await BookRepository.reduce_book_stock(db, book, item.quantity)
 
             # create all bill rows
-            BillsRepository.create_bill_rows(db, bill_rows)
+            await BillsRepository.create_bill_rows(db, bill_rows)
 
             # commit full transaction only after all rows and stock changes succeed
-            db.commit()
+            await db.commit()
 
             # refresh rows after commit
             for row in bill_rows:
-                db.refresh(row)
+                await db.refresh(row)
 
-            return BillsService._build_bill_response(
+            return await BillsService._build_bill_response(
                 bill_rows=bill_rows,
                 total_amount=total_amount,
                 customer_name=current_user.name,
@@ -99,18 +98,18 @@ class BillsService:
             )
 
         except HTTPException:
-            db.rollback()
+            await db.rollback()
             raise
         except Exception as exc:
-            db.rollback()
+            await db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Checkout failed: {str(exc)}"
             )
 
     @staticmethod
-    def get_bill_by_id(db: Session, bill_id: int):
-        bill = BillsRepository.get_bill_by_id(db, bill_id)
+    async def get_bill_by_id(db: AsyncSession, bill_id: int):
+        bill = await BillsRepository.get_bill_by_id(db, bill_id)
         if not bill:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -119,16 +118,16 @@ class BillsService:
         return bill
 
     @staticmethod
-    def get_all_bills(db: Session):
-        return BillsRepository.get_all_bills(db)
+    async def get_all_bills(db: AsyncSession):
+        return  await BillsRepository.get_all_bills(db)
 
     @staticmethod
-    def get_user_bills(db: Session, current_user: User):
-        return BillsRepository.get_bills_by_user_id(db, current_user.id)
+    async def get_user_bills(db: AsyncSession, current_user: User):
+        return await BillsRepository.get_bills_by_user_id(db, current_user.id)
 
     @staticmethod
-    def get_bill_order_summary(db: Session, order_group: str) -> BillResponse:
-        rows = BillsRepository.get_bills_by_order_group(db, order_group)
+    async def get_bill_order_summary(db: AsyncSession, order_group: str) -> BillResponse:
+        rows = await BillsRepository.get_bills_by_order_group(db, order_group)
 
         if not rows:
             raise HTTPException(
@@ -139,7 +138,7 @@ class BillsService:
         total_amount = sum(row.line_total for row in rows)
         customer_name = rows[0].customer_name
 
-        return BillsService._build_bill_response(
+        return await BillsService._build_bill_response(
             bill_rows=rows,
             total_amount=total_amount,
             customer_name=customer_name,

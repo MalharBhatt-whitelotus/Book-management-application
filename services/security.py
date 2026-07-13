@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-
+from sqlalchemy.ext.asyncio import AsyncSession
 from config import settings
 from database import get_db
 from repository.user_repo import UserRepository
@@ -85,11 +85,11 @@ def decode_access_token(token: str) -> TokenData:
         raise credentials_exception
 
 
-def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
+async def authenticate_user(db: AsyncSession, username: str, password: str) -> Optional[User]:
     """
     Validate username + password
     """
-    user = UserRepository.get_user_by_username(db, username)
+    user = await UserRepository.get_user_by_username(db, username)
     if not user:
         return None
 
@@ -99,15 +99,15 @@ def authenticate_user(db: Session, username: str, password: str) -> Optional[Use
     return user
 
 
-def get_current_user(
+async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ) -> User:
     """
     Resolve current logged-in user from JWT token
     """
     token_data = decode_access_token(token)
-    user = UserRepository.get_user_by_username(db, token_data.username)
+    user = await UserRepository.get_user_by_username(db, token_data.username)
 
     if not user:
         raise HTTPException(
