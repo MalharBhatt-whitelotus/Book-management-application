@@ -96,7 +96,7 @@ class BookService:
         sort_by: str = "id",
         order: str = "asc"
         ):
-        return BookRepository.filter_and_sort_books(
+        return await BookRepository.filter_and_sort_books(
             db=db,
             category=category,
             author=author,
