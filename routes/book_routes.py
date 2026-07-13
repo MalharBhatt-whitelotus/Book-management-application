@@ -33,6 +33,30 @@ async def get_available_books(db: AsyncSession = Depends(get_db)):
     """
     return await BookService.get_available_books(db)
 
+@router.get("/filter")
+async def filter_books(
+    category: Optional[str] = None,
+    author: Optional[str] = None,
+    book_type: Optional[str] = None,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
+    available: Optional[bool] = None,
+    sort_by: str = "id",
+    order: str = "asc",
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return await BookService.filter_and_sort_books(
+        db=db,
+        category=category,
+        author=author,
+        book_type=book_type,
+        min_price=min_price,
+        max_price=max_price,
+        available=available,
+        sort_by=sort_by,
+        order=order
+        )
 
 @router.get("/{book_id}", response_model=BookRead)
 async def get_book(book_id: int, db: AsyncSession = Depends(get_db)):
@@ -74,28 +98,3 @@ async def delete_book(
     Admin-only: delete book
     """
     return await BookService.delete_book(db, book_id)
-
-@router.get("/filer")
-async def filter_books(
-    category: Optional[str] = None,
-    author: Optional[str] = None,
-    book_type: Optional[str] = None,
-    min_price: Optional[float] = None,
-    max_price: Optional[float] = None,
-    available: Optional[bool] = None,
-    sort_by: str = "id",
-    order: str = "asc",
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    return await BookService.filter_and_sort_books(
-        db=db,
-        category=category,
-        author=author,
-        book_type=book_type,
-        min_price=min_price,
-        max_price=max_price,
-        available=available,
-        sort_by=sort_by,
-        order=order
-        )
